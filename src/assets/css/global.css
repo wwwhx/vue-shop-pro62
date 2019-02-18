@@ -15,3 +15,21 @@ body,
 i.iconfont {
   margin-right: 10px;
 }
+
+/* 卡片统一样式处理 */
+.box-card {
+  margin-top: 15px;
+  box-shadow: 0, 1px, 1px, rgba(0, 0, 0, 0.15) !important;
+}
+
+/* table表格统一样式处理 */
+.el-table {
+  margin-top: 15px;
+  font-size: 12px;
+}
+
+/* 分页按钮统一样式设置 */
+.el-pagination {
+  margin-top: 15px;
+  font-size: 12px;
+}

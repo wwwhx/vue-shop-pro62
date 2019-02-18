@@ -8,6 +8,7 @@
       </div>
       <el-button type="info" @click="logout">退出</el-button>
     </el-header>
+    <!-- 头部结束 -->
     <!-- 左侧部分 -->
     <el-container>
       <el-aside :width="menushow ? '65px' : '200px'">
@@ -18,25 +19,27 @@
           background-color="#333744"
           text-color="#fff"
           active-text-color="#409EFF"
-          :style="menushow ? '65px' : '200px'"
           :collapse-transition="false"
+          :router="true"
         >
-          <el-submenu :index="item.id+''" v-for="(item,k) in menuList" :key="item.id">
+          <el-submenu
+            :style="menushow ? '65px' : '200px'"
+            :index="item.id+''"
+            v-for="(item,k) in menuList"
+            :key="item.id"
+          >
             <template slot="title">
               <i :class="'iconfont icon-' + menuicon[k]"></i>
               <span>{{item.authName}}</span>
             </template>
-            <el-menu-item
-              :index="item.id + '-' + item2.id"
-              v-for="item2 in item.children"
-              :key="item2.id"
-            >
+            <el-menu-item :index="item2.path" v-for="item2 in item.children" :key="item2.id">
               <i class="el-icon-menu"></i>
               <span>{{item2.authName}}</span>
             </el-menu-item>
           </el-submenu>
         </el-menu>
       </el-aside>
+      <!-- 左侧结束 -->
       <el-main>
         <router-view></router-view>
       </el-main>
@@ -78,7 +81,7 @@ export default {
     // 获取左侧信息
     async getMenuList() {
       const { data: res } = await this.$http.get('/menus')
-      console.log(res)
+      // console.log(res)
       // 判断status是否正确
       if (res.meta.status !== 200) {
         return this.$message.error(res.meta.msg)
