@@ -65,7 +65,12 @@
               :enterable="false"
               placement="top-start"
             >
-              <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
+              <el-button
+                @click="fenpeishowser(info.row.id)"
+                type="warning"
+                icon="el-icon-setting"
+                size="mini"
+              ></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -141,6 +146,27 @@
           <el-button type="primary" @click="editusers">确 定</el-button>
         </span>
       </el-dialog>
+
+      <!-- 给用户分配角色对话框 -->
+      <el-dialog @close="fenpeicz" title="用户分配角色" :visible.sync="fenpeidialogVisible" width="50%">
+        <el-form ref="fenpeiformref" :rules="fenpeiform" :model="fenpeiform" label-width="120px">
+          <el-form-item label="当前用户: ">{{fenpeiform.username}}</el-form-item>
+          <el-form-item label="分配新角色: ">
+            <el-select v-model="fenpeiform.rid" placeholder="请选择">
+              <el-option
+                v-for="item in getjueseinfo"
+                :key="item.id"
+                :label="item.roleName"
+                :value="item.id"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="fenpeidialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="editjuese">确 定</el-button>
+        </span>
+      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -159,6 +185,22 @@ export default {
       }
     }
     return {
+      // 分配角色开始
+      fenpeidialogVisible: false,
+      // 用于接收所有的角色名
+      getjueseinfo: [],
+      // 用于接收角色的信息
+      // 有成员email id mobile rid username
+      fenpeiform: {
+        username: '',
+        id: 0,
+        rid: 0
+      },
+      // 分配角色验证规则
+      fenpeiform: {
+        // rid: [{ required: true, message: '角色必选', trigger: 'change' }]
+      },
+      // 分配角色结束
       // 修改用户开始
       editdialogVisible: false,
       // 修改用户的数据
@@ -210,6 +252,56 @@ export default {
     }
   },
   methods: {
+    // 分配角色开始
+    // 重置分配表单
+    fenpeicz() {
+      this.$refs.fenpeiformref.resetFields()
+    },
+    // 展示分配角色的信息数据
+    async fenpeishowser(id) {
+      const { data: res } = await this.$http.get('users/' + id)
+      console.log(res)
+      if (res.meta.status !== 200) {
+        return this.$message.error(res.meta.msg)
+      }
+      // 打开分配角色对话框
+      this.fenpeidialogVisible = true
+      // 将用户信息赋予给分配角色fenpeiform中
+      this.fenpeiform = res.data
+
+      // 获取到角色列表
+      const { data: res2 } = await this.$http.get('/roles')
+      if (res2.meta.status !== 200) {
+        return this.$message.error(res2.meta.msg)
+      }
+      // console.log(res2)
+      this.getjueseinfo = res2.data
+      // console.log(this.getjueseinfo)
+    },
+    // 重新分配角色
+    async editjuese() {
+      // this.$refs.fenpeiformref.validate(async valid => {
+      // if (valid) {
+      // console.log(this.fenpeiform)
+      const { data: res } = await this.$http.put(
+        'users/' + this.fenpeiform.id + '/role',
+        this.fenpeiform
+      )
+      console.log(res)
+      if (res.meta.status !== 200) {
+        return this.$message.error(res.meta.msg)
+      }
+      // 关闭对话框
+      this.fenpeidialogVisible = false
+      // 显示修改成功
+      this.$message.success(res.meta.msg)
+      // 重新渲染数据
+      this.getUserInfos()
+      console.log(111)
+      // }
+      // })
+    },
+    // 分配角色结束
     // 修改用户信息
     async showeditdialogVisible(id) {
       this.editdialogVisible = true
@@ -319,6 +411,7 @@ export default {
       this.querycdt.tot = res.data.total
     }
   },
+  // 生命周期
   created() {
     this.getUserInfos()
   }
